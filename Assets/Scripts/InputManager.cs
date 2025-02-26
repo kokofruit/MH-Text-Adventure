@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,11 +31,17 @@ public class InputManager : MonoBehaviour
         commands.Add("go");
         commands.Add("get");
 
-        userInput.onEndEdit.AddListener(UpdateStory);
+        userInput.onEndEdit.AddListener(ProcessInput);
         story = storyText.text;
     }
 
     public void UpdateStory(string msg)
+    {
+        story += "\n" + msg;
+        storyText.text = story;
+    }
+
+    void ProcessInput(string msg)
     {
         if (msg != "")
         {
@@ -44,14 +50,37 @@ public class InputManager : MonoBehaviour
 
             if (splitMsg.Length > 0 && commands.Contains(splitMsg[0])) // if valid command
             {
-                story += "\n" + msg;
-                storyText.text = story;
+                UpdateStory("> " + msg.ToUpper());
+                if (splitMsg[0] == "go")
+                {
+                    if (NavigationManager.instance.SwitchRooms(splitMsg[1]))
+                    {
+                        //TODO
+                    }
+                    else
+                    {
+                        UpdateStory("Invalid direction.");
+                    }
+                }
+                
+                else if (splitMsg[0] == "get")
+                {
+                    if (NavigationManager.instance.GetItem(splitMsg[1]))
+                    {
+                        GameManager.instance.inventory.Add(splitMsg[1]);
+                        UpdateStory("You got: " + splitMsg[1].ToUpper() + " ★");
+                    }
+                    else
+                    {
+                        UpdateStory("Invalid item.");
+                    }
+                }
             }
         }
 
         // reset for next input
         userInput.text = ""; // after input from user, reset
         userInput.ActivateInputField(); // like clicking back into it
-        
     }
+
 }

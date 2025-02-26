@@ -6,6 +6,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
+    public List<string> inventory = new();
+
     private void Awake()
     {
         if (instance == null)
@@ -15,9 +17,6 @@ public class GameManager : MonoBehaviour
 
         DontDestroyOnLoad(gameObject);
     }
-    // Start is called before the first frame update
-    void Start()
-    {
-       
-    }
+
+
 }
