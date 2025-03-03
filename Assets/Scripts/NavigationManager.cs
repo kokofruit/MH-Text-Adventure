@@ -23,10 +23,8 @@ public class NavigationManager : MonoBehaviour
 
     void Start()
     {
-        toKeyNorth.isHidden = true;
-
-        currentRoom = startingRoom;
-        Unpack();
+        InputManager.instance.onRestart += ResetGame;
+        ResetGame();
     }
 
     void Unpack()
@@ -44,16 +42,29 @@ public class NavigationManager : MonoBehaviour
         InputManager.instance.UpdateStory(description);
     }
 
-    public bool SwitchRooms(string dir)
+    public int SwitchRooms(string dir)
     {
         if (exitRooms.ContainsKey(dir)) // if that exit exists
         {
+            if (getExit(dir).isLocked && !GameManager.instance.inventory.Contains("key")) return 4;
             currentRoom = exitRooms[dir];
             InputManager.instance.UpdateStory("\nYou go " + dir.ToUpper() +".");
             Unpack();
-            return true;
+            return 0;
         }
-        return false;
+        return 3;
+    }
+
+    Exit getExit(string dir)
+    {
+        foreach (Exit e in currentRoom.exits)
+        {
+            if (e.direction.ToString() == dir)
+            {
+                return e;
+            }
+        }
+        return null;
     }
 
     public bool GetItem(string item)
@@ -64,9 +75,17 @@ public class NavigationManager : MonoBehaviour
         {
             toKeyNorth.isHidden = false;
             //currentRoom.hasOrb = false;
-            currentRoom.description = "There used to be a blue orb in here.";
+            //currentRoom.description = "There used to be a blue orb in here.";
             return true;
         }
         else return false;
+    }
+
+    private void ResetGame()
+    {
+        toKeyNorth.isHidden = true;
+
+        currentRoom = startingRoom;
+        Unpack();
     }
 }

@@ -18,5 +18,13 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    private void Start()
+    {
+        InputManager.instance.onRestart += ResetGame;
+    }
 
+    private void ResetGame()
+    {
+        inventory.Clear();
+    }
 }

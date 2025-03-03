@@ -12,7 +12,11 @@ public class InputManager : MonoBehaviour
     public InputField userInput; // the input field object
     public Text inputText; // part of the input field where user enters response
     public Text placeHolderText; // part of the input field for initial placeholder text
-    
+
+    // first step is creating a using delegate
+    public delegate void Restart(); // create delegate
+    public event Restart onRestart; // create delegate event
+
     private string story; // holds the story to display
     private List<string> commands = new(); //valid user commands
 
@@ -30,6 +34,7 @@ public class InputManager : MonoBehaviour
     {
         commands.Add("go");
         commands.Add("get");
+        commands.Add("restart"); // added to work with delegate example
 
         userInput.onEndEdit.AddListener(ProcessInput);
         story = storyText.text;
@@ -53,13 +58,18 @@ public class InputManager : MonoBehaviour
                 UpdateStory("> " + msg.ToUpper());
                 if (splitMsg[0] == "go")
                 {
-                    if (NavigationManager.instance.SwitchRooms(splitMsg[1]))
+                    int exitCode = NavigationManager.instance.SwitchRooms(splitMsg[1]);
+                    if ( exitCode == 0)
                     {
                         //TODO
                     }
-                    else
+                    else if (exitCode == 3)
                     {
                         UpdateStory("Invalid direction.");
+                    }
+                    else if (exitCode == 4)
+                    {
+                        UpdateStory("Door is locked.");
                     }
                 }
                 
@@ -74,6 +84,12 @@ public class InputManager : MonoBehaviour
                     {
                         UpdateStory("Invalid item.");
                     }
+                }
+
+                else if (splitMsg[0] == "restart")
+                {
+                    if (onRestart != null) // if anyone is listening
+                        onRestart(); // invoke the event
                 }
             }
         }
