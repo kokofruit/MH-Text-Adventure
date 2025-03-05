@@ -35,9 +35,13 @@ public class InputManager : MonoBehaviour
         commands.Add("go");
         commands.Add("get");
         commands.Add("restart"); // added to work with delegate example
+        commands.Add("save");
+        commands.Add("load");
 
         userInput.onEndEdit.AddListener(ProcessInput);
         story = storyText.text;
+
+        NavigationManager.instance.onGameOver += EndGame;
     }
 
     public void UpdateStory(string msg)
@@ -56,40 +60,84 @@ public class InputManager : MonoBehaviour
             if (splitMsg.Length > 0 && commands.Contains(splitMsg[0])) // if valid command
             {
                 UpdateStory("> " + msg.ToUpper());
-                if (splitMsg[0] == "go")
-                {
-                    int exitCode = NavigationManager.instance.SwitchRooms(splitMsg[1]);
-                    if ( exitCode == 0)
-                    {
-                        //TODO
-                    }
-                    else if (exitCode == 3)
-                    {
-                        UpdateStory("Invalid direction.");
-                    }
-                    else if (exitCode == 4)
-                    {
-                        UpdateStory("Door is locked.");
-                    }
-                }
+                //if (splitMsg[0] == "go")
+                //{
+                //    int exitCode = NavigationManager.instance.SwitchRooms(splitMsg[1]);
+                //    if ( exitCode == 0)
+                //    {
+                //        //TODO
+                //    }
+                //    else if (exitCode == 3)
+                //    {
+                //        UpdateStory("Invalid direction.");
+                //    }
+                //    else if (exitCode == 4)
+                //    {
+                //        UpdateStory("Door is locked.");
+                //    }
+                //}
                 
-                else if (splitMsg[0] == "get")
-                {
-                    if (NavigationManager.instance.GetItem(splitMsg[1]))
-                    {
-                        GameManager.instance.inventory.Add(splitMsg[1]);
-                        UpdateStory("You got: " + splitMsg[1].ToUpper() + " ★");
-                    }
-                    else
-                    {
-                        UpdateStory("Invalid item.");
-                    }
-                }
+                //else if (splitMsg[0] == "get")
+                //{
+                //    if (NavigationManager.instance.GetItem(splitMsg[1]))
+                //    {
+                //        GameManager.instance.inventory.Add(splitMsg[1]);
+                //        UpdateStory("You got: " + splitMsg[1].ToUpper() + " ★");
+                //    }
+                //    else
+                //    {
+                //        UpdateStory("Invalid item.");
+                //    }
+                //}
 
-                else if (splitMsg[0] == "restart")
+                //else if (splitMsg[0] == "restart")
+                //{
+                //    if (onRestart != null) // if anyone is listening
+                //        onRestart(); // invoke the event
+                //}
+
+                //else if (splitMsg[0] == "save")
+                //{
+                //    GameManager.instance.Save();
+                //}
+                switch (splitMsg[0])
                 {
-                    if (onRestart != null) // if anyone is listening
-                        onRestart(); // invoke the event
+                    case "go":
+                        int exitCode = NavigationManager.instance.SwitchRooms(splitMsg[1]);
+                        if (exitCode == 0)
+                        {
+                            //TODO
+                        }
+                        else if (exitCode == 3)
+                        {
+                            UpdateStory("Invalid direction.");
+                        }
+                        else if (exitCode == 4)
+                        {
+                            UpdateStory("Door is locked.");
+                        }
+                        break;
+                    case "get":
+                        if (NavigationManager.instance.GetItem(splitMsg[1]))
+                        {
+                            GameManager.instance.inventory.Add(splitMsg[1]);
+                            UpdateStory("You got: " + splitMsg[1].ToUpper() + " ★");
+                        }
+                        else
+                        {
+                            UpdateStory("Invalid item.");
+                        }
+                        break;
+                    case "restart":
+                        if (onRestart != null) // if anyone is listening
+                            onRestart(); // invoke the event
+                        break;
+                    case "save":
+                        GameManager.instance.Save();
+                        UpdateStory("Game saved.");
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -99,4 +147,8 @@ public class InputManager : MonoBehaviour
         userInput.ActivateInputField(); // like clicking back into it
     }
 
+    void EndGame()
+    {
+        UpdateStory("Game Over! Enter 'restart' to play again.\n");
+    }
 }

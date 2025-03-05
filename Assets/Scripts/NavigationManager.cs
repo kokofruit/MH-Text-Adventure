@@ -7,6 +7,10 @@ public class NavigationManager : MonoBehaviour
     public static NavigationManager instance;
     public Room startingRoom;
     public Room currentRoom;
+    public List<Room> rooms; // needed to restore room upon load
+
+    public delegate void GameOver();
+    public event GameOver onGameOver;
 
     public Exit toKeyNorth; //needed to turn exit to visible from hidden
 
@@ -24,7 +28,6 @@ public class NavigationManager : MonoBehaviour
     void Start()
     {
         InputManager.instance.onRestart += ResetGame;
-        ResetGame();
     }
 
     void Unpack()
@@ -40,6 +43,8 @@ public class NavigationManager : MonoBehaviour
         }
 
         InputManager.instance.UpdateStory(description);
+
+        if (exitRooms.Count == 0 && onGameOver != null) onGameOver();
     }
 
     public int SwitchRooms(string dir)
@@ -53,6 +58,12 @@ public class NavigationManager : MonoBehaviour
             return 0;
         }
         return 3;
+    }
+
+    public void SwitchRooms(Room room)
+    {
+        currentRoom = room;
+        Unpack();
     }
 
     Exit getExit(string dir)
@@ -81,11 +92,20 @@ public class NavigationManager : MonoBehaviour
         else return false;
     }
 
-    private void ResetGame()
+    public void ResetGame()
     {
         toKeyNorth.isHidden = true;
 
         currentRoom = startingRoom;
         Unpack();
+    }
+
+    public Room GetRoomFromName(string name)
+    {
+        foreach (Room r in rooms)
+        {
+            if (r.name == name) return r;
+        }
+        return null;
     }
 }
