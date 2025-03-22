@@ -9,7 +9,6 @@ public class Room : ScriptableObject
     [TextArea]
     public string description;
     public Exit[] exits;
-
-    public bool hasKey;
-    public bool hasOrb;
+    public string containedItem;
+    public string usuableItem;
 }

@@ -53,7 +53,7 @@ public class NavigationManager : MonoBehaviour
         {
             if (getExit(dir).isLocked && !GameManager.instance.inventory.Contains("key")) return 4;
             currentRoom = exitRooms[dir];
-            InputManager.instance.UpdateStory("\nYou go " + dir.ToUpper() +".");
+            InputManager.instance.UpdateStory("You go " + dir.ToUpper() +".");
             Unpack();
             return 0;
         }
@@ -80,16 +80,29 @@ public class NavigationManager : MonoBehaviour
 
     public bool GetItem(string item)
     {
-        if (item == "key" && currentRoom.hasKey)
-            return true;
-        else if (item == "orb" && currentRoom.hasOrb)
-        {
-            toKeyNorth.isHidden = false;
-            //currentRoom.hasOrb = false;
-            //currentRoom.description = "There used to be a blue orb in here.";
+        if (item == currentRoom.containedItem){
+            if (item == "orb") toKeyNorth.isHidden = false;
             return true;
         }
         else return false;
+    }
+    
+    public bool UseItem(string item){
+        if (item != currentRoom.usuableItem) return false;
+
+        if (item == "key" || item == "handle"){
+            foreach (Exit exit in currentRoom.exits){
+                exit.isLocked = false;
+            }
+        }
+        
+        if (item == "orb" || item == "sword"){
+            foreach (Exit exit in currentRoom.exits){
+                exit.isHidden = false;
+            }
+        }
+
+        return true;
     }
 
     public void ResetGame()

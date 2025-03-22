@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    public List<string> inventory = new();
+    public HashSet<string> inventory = new();
 
     private void Awake()
     {
@@ -34,8 +34,11 @@ public class GameManager : MonoBehaviour
     public void Save()
     {
         // set up data to save
-        SaveState playerState = new();
-        playerState.currentRoom = NavigationManager.instance.currentRoom.name;
+        SaveState playerState = new()
+        {
+            currentRoom = NavigationManager.instance.currentRoom.name,
+            currentInventory = inventory
+        };
 
         BinaryFormatter bf = new();
         FileStream afile = File.Create(Application.persistentDataPath + "/player.save");
@@ -58,6 +61,8 @@ public class GameManager : MonoBehaviour
             {
                 NavigationManager.instance.SwitchRooms(room);
             }
+
+            inventory = playerState.currentInventory;
         }
         else //New player
         {

@@ -6,5 +6,5 @@ using UnityEngine;
 public class SaveState
 {
     public string currentRoom;
-
+    public HashSet<string> currentInventory;
 }
