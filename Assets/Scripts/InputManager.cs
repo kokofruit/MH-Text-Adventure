@@ -33,6 +33,7 @@ public class InputManager : MonoBehaviour
     void Start()
     {
         commands.Add("commands");
+        commands.Add("current");
         commands.Add("go");
         commands.Add("get");
         commands.Add("inventory");
@@ -71,8 +72,13 @@ public class InputManager : MonoBehaviour
                             string printOut = "  · " + command;
                             if (command == "go") printOut += " [direction]";
                             if (command == "get") printOut += " [item]";
+                            if (command == "use") printOut += " [item]";
                             UpdateStory(printOut);
                         }
+                        break;
+
+                    case "current":
+                        NavigationManager.instance.SwitchRooms(NavigationManager.instance.currentRoom);
                         break;
 
                     case "go":
@@ -95,7 +101,10 @@ public class InputManager : MonoBehaviour
                         if (NavigationManager.instance.GetItem(splitMsg[1]))
                         {
                             if (GameManager.instance.inventory.Add(splitMsg[1]))
+                            {
                                 UpdateStory("You got: " + splitMsg[1].ToUpper() + " ★");
+                                NavigationManager.instance.SwitchRooms(NavigationManager.instance.currentRoom);
+                            }
                             else
                                 UpdateStory("You already have this.");
                         }

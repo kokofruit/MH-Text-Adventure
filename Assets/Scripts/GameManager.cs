@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -37,8 +38,19 @@ public class GameManager : MonoBehaviour
         SaveState playerState = new()
         {
             currentRoom = NavigationManager.instance.currentRoom.name,
-            currentInventory = inventory
+            currentInventory = inventory,
+            exitStatuses = new(),
+            roomDescIndexes = new(),
         };
+        foreach (Exit exit in NavigationManager.instance.exits)
+        {
+            bool[] exitStatus = {exit.isHidden, exit.isLocked};
+            playerState.exitStatuses.Add(exitStatus);
+        }
+        foreach (Room room in NavigationManager.instance.rooms)
+        {
+            playerState.roomDescIndexes.Add(room.descIndex);
+        }
 
         BinaryFormatter bf = new();
         FileStream afile = File.Create(Application.persistentDataPath + "/player.save");
@@ -56,13 +68,26 @@ public class GameManager : MonoBehaviour
             SaveState playerState = (SaveState) bf.Deserialize(afile);
             afile.Close();
 
+            print(playerState.currentRoom);
             Room room = NavigationManager.instance.GetRoomFromName(playerState.currentRoom);
             if (room != null)
             {
                 NavigationManager.instance.SwitchRooms(room);
             }
+            print(room.name);
 
             inventory = playerState.currentInventory;
+
+            for (int i = 0; i < NavigationManager.instance.exits.Count; i++)
+            {
+                NavigationManager.instance.exits[i].isHidden = playerState.exitStatuses[i][0];
+                NavigationManager.instance.exits[i].isLocked = playerState.exitStatuses[i][1];
+            }
+
+            for (int i = 0; i < NavigationManager.instance.rooms.Count; i++)
+            {
+                NavigationManager.instance.rooms[i].descIndex = playerState.roomDescIndexes[i];
+            }
         }
         else //New player
         {

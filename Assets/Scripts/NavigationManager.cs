@@ -8,11 +8,13 @@ public class NavigationManager : MonoBehaviour
     public Room startingRoom;
     public Room currentRoom;
     public List<Room> rooms; // needed to restore room upon load
+    public List<Exit> exits;
 
     public delegate void GameOver();
     public event GameOver onGameOver;
 
-    public Exit toKeyNorth; //needed to turn exit to visible from hidden
+    public List<Exit> hiddenExits;
+    public List<Exit> lockedExits;
 
     private Dictionary<string, Room> exitRooms = new();
 
@@ -32,8 +34,12 @@ public class NavigationManager : MonoBehaviour
 
     void Unpack()
     {
-        string description = currentRoom.description;
+        // get current description
+        string description = currentRoom.descriptions[currentRoom.descIndex];
+        // update description if applicable
+        if (currentRoom.autoIncrement && currentRoom.descIndex < currentRoom.descriptions.Length-1) currentRoom.descIndex += 1;
         
+        // get exit descriptions
         exitRooms.Clear();
         foreach (Exit e in currentRoom.exits)
         {
@@ -42,8 +48,10 @@ public class NavigationManager : MonoBehaviour
             exitRooms.Add(e.direction.ToString(), e.room);
         }
 
+        // display
         InputManager.instance.UpdateStory(description);
 
+        // end game if no usable exits
         if (exitRooms.Count == 0 && onGameOver != null) onGameOver();
     }
 
@@ -51,7 +59,7 @@ public class NavigationManager : MonoBehaviour
     {
         if (exitRooms.ContainsKey(dir)) // if that exit exists
         {
-            if (getExit(dir).isLocked && !GameManager.instance.inventory.Contains("key")) return 4;
+            if (GetExit(dir).isLocked) return 4;
             currentRoom = exitRooms[dir];
             InputManager.instance.UpdateStory("You go " + dir.ToUpper() +".");
             Unpack();
@@ -66,7 +74,7 @@ public class NavigationManager : MonoBehaviour
         Unpack();
     }
 
-    Exit getExit(string dir)
+    Exit GetExit(string dir)
     {
         foreach (Exit e in currentRoom.exits)
         {
@@ -81,7 +89,7 @@ public class NavigationManager : MonoBehaviour
     public bool GetItem(string item)
     {
         if (item == currentRoom.containedItem){
-            if (item == "orb") toKeyNorth.isHidden = false;
+            if (currentRoom.descIndex < currentRoom.descriptions.Length-1) currentRoom.descIndex += 1;
             return true;
         }
         else return false;
@@ -90,24 +98,44 @@ public class NavigationManager : MonoBehaviour
     public bool UseItem(string item){
         if (item != currentRoom.usuableItem) return false;
 
+        if (currentRoom.descIndex < currentRoom.descriptions.Length-1) currentRoom.descIndex += 1;
+
         if (item == "key" || item == "handle"){
+            // special dialogue
+            if (item == "key") InputManager.instance.UpdateStory("You twist the key inside the eastern door's lock, and you hear a loud click.");
+            if (item == "handle") InputManager.instance.UpdateStory("After some fiddling, you fit the handle into the cranking mechanism, and open up the north door.");
+            // unlock exits
             foreach (Exit exit in currentRoom.exits){
                 exit.isLocked = false;
             }
         }
         
         if (item == "orb" || item == "sword"){
+            // special dialogue
+            if (item == "orb") InputManager.instance.UpdateStory("As you place the orb on top of the pedestal, you hear mechanical humming beside you.");
+            if (item == "sword") InputManager.instance.UpdateStory("The fight is short but precarious. After a few close calls, you slay the beast with a fatal strike to it's neck.");
+            // unhide exits
             foreach (Exit exit in currentRoom.exits){
                 exit.isHidden = false;
             }
         }
+
+        SwitchRooms(currentRoom);
 
         return true;
     }
 
     public void ResetGame()
     {
-        toKeyNorth.isHidden = true;
+        foreach (Exit exit in exits){
+            exit.isHidden = exit.isHiddenByDefault;
+            exit.isLocked = exit.isLockedByDefault;
+        }
+
+        foreach (Room room in rooms)
+        {
+            room.descIndex = 0;
+        }
 
         currentRoom = startingRoom;
         Unpack();
