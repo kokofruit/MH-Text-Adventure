@@ -37,21 +37,28 @@ public class GameManager : MonoBehaviour
         // set up data to save
         SaveState playerState = new()
         {
+            // current room by name
             currentRoom = NavigationManager.instance.currentRoom.name,
+            // inventory as hashset
             currentInventory = inventory,
+            // exit statuses as temporary empty list of bool arrays
             exitStatuses = new(),
+            // room description indexes as temporary list of ints
             roomDescIndexes = new(),
         };
+        // fill exitStatuses list with arrays of exit conditions
         foreach (Exit exit in NavigationManager.instance.exits)
         {
             bool[] exitStatus = {exit.isHidden, exit.isLocked};
             playerState.exitStatuses.Add(exitStatus);
         }
+        // fill roomDescIndexes list with room indexes
         foreach (Room room in NavigationManager.instance.rooms)
         {
             playerState.roomDescIndexes.Add(room.descIndex);
         }
 
+        // serialize and close
         BinaryFormatter bf = new();
         FileStream afile = File.Create(Application.persistentDataPath + "/player.save");
         print(Application.persistentDataPath);
@@ -63,27 +70,30 @@ public class GameManager : MonoBehaviour
     {
         if (File.Exists(Application.persistentDataPath + "/player.save"))
         {
+            // open, deserialize, and close file
             BinaryFormatter bf = new();
             FileStream afile = File.Open(Application.persistentDataPath + "/player.save", FileMode.Open);
             SaveState playerState = (SaveState) bf.Deserialize(afile);
             afile.Close();
 
-            print(playerState.currentRoom);
+            // set current room
             Room room = NavigationManager.instance.GetRoomFromName(playerState.currentRoom);
             if (room != null)
             {
                 NavigationManager.instance.SwitchRooms(room);
             }
-            print(room.name);
 
+            // set inventory
             inventory = playerState.currentInventory;
 
+            // set exit conditions
             for (int i = 0; i < NavigationManager.instance.exits.Count; i++)
             {
                 NavigationManager.instance.exits[i].isHidden = playerState.exitStatuses[i][0];
                 NavigationManager.instance.exits[i].isLocked = playerState.exitStatuses[i][1];
             }
 
+            // set room descriptions
             for (int i = 0; i < NavigationManager.instance.rooms.Count; i++)
             {
                 NavigationManager.instance.rooms[i].descIndex = playerState.roomDescIndexes[i];

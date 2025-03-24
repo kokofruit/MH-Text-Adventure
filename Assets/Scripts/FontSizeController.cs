@@ -14,10 +14,12 @@ public class FontSizeController : MonoBehaviour
 
     void Start()
     {
+        // load fontsize from playerprefs, 14 by default
         int pref = PlayerPrefs.GetInt("fontSize", 14);
         fontSize = pref;
         UpdateFontSize();
 
+        // add listeners to buttons
         minusButton.onClick.AddListener(DecreaseFontSize);
         plusButton.onClick.AddListener(IncreaseFontSize);
     }
@@ -32,6 +34,7 @@ public class FontSizeController : MonoBehaviour
         UpdateFontSize();
     }
 
+    // set all text's font to the fontsize
     void UpdateFontSize(){
         foreach (Text text in textList)
         {

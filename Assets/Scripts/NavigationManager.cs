@@ -96,8 +96,10 @@ public class NavigationManager : MonoBehaviour
     }
     
     public bool UseItem(string item){
+        // if the item is not usable here, return false
         if (item != currentRoom.usuableItem) return false;
 
+        // change room description
         if (currentRoom.descIndex < currentRoom.descriptions.Length-1) currentRoom.descIndex += 1;
 
         if (item == "key" || item == "handle"){

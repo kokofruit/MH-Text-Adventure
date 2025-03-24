@@ -10,10 +10,10 @@ public class Exit : ScriptableObject
     [TextArea]
     public string description;
     public Room room;
-
+    // used for gameplay
     public bool isLocked;
     public bool isHidden;
-
+    // used for resetting exits
     public bool isLockedByDefault;
     public bool isHiddenByDefault;
 }

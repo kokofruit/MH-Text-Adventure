@@ -40,7 +40,6 @@ public class InputManager : MonoBehaviour
         commands.Add("use");
         commands.Add("restart"); // added to work with delegate example
         commands.Add("save");
-        commands.Add("load");
 
         userInput.onEndEdit.AddListener(ProcessInput);
         story = storyText.text;
@@ -78,6 +77,7 @@ public class InputManager : MonoBehaviour
                         break;
 
                     case "current":
+                        // print current description
                         NavigationManager.instance.SwitchRooms(NavigationManager.instance.currentRoom);
                         break;
 
